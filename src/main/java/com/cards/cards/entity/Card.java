@@ -19,7 +19,6 @@ public class Card {
     private UUID id;
     private String front;
     private String back;
-
     @Column(name = "deck_id")
     private UUID deckId;
 
