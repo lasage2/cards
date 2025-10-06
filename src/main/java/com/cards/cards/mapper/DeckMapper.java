@@ -6,4 +6,5 @@ import com.cards.cards.entity.Deck;
 @org.mapstruct.Mapper(componentModel = "spring")
 public interface DeckMapper {
     DeckDTO toDTO (Deck deck);
+    Deck toEntity (DeckDTO deckDTO);
 }
