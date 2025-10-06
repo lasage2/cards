@@ -1,0 +1,183 @@
+@startuml
+!theme plain
+
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+
+package "Controller Layer" {
+  class DeckController <<RestController>> {
+    - DeckService deckService
+    - CardService cardService
+    - DeckMapper deckMapper
+    - CardMapper cardMapper
+    + getAllDecks(): List<DeckDTO>
+    + getDeckById(UUID): DeckDTO
+    + getDecksByOwnerId(UUID): List<DeckDTO>
+    + createDeck(DeckDTO): DeckDTO
+    + deleteDeck(UUID): void
+    + getCardsByDeckId(UUID): List<CardDTO>
+    + createCard(CardDTO): CardDTO
+    + deleteCard(UUID cardId): void
+  }
+}
+
+package "Mapper Layer" {
+  interface DeckMapper <<Mapper>> {
+    + toDTO(Deck): DeckDTO
+    + toEntity(DeckDTO) : Deck
+  }
+
+  interface CardMapper <<Mapper>> {
+    + toDTO(Card): CardDTO
+    + toEntity(CardDTO): Card
+  }
+}
+
+package "Service Layer" {
+  interface DeckService <<Interface>> {
+    + getAllDecks(): List<Deck>
+    + getDeckById(UUID): Deck
+    + getDecksByOwnerId(UUID): List<Deck>
+    + createDeck(Deck): Deck
+    + deleteDeck(UUID): void
+  }
+
+  class DeckServiceImpl <<Service>> {
+    - DeckRepository deckRepository
+    + getAllDecks(): List<Deck>
+    + getDeckById(UUID): Deck
+    + getDecksByOwnerId(UUID): List<Deck>
+    + createDeck(Deck): Deck
+    + deleteDeck(UUID): void
+  }
+
+  interface CardService <<Interface>> {
+    + getCardsByDeckId(UUID): List<Card>
+    + createCard(Card): Card
+    + deleteCard(UUID): void
+  }
+
+  class CardServiceImpl <<Service>> {
+    - CardRepository cardRepository
+    + getCardsByDeckId(UUID): List<Card>
+    + createCard(Card): Card
+    + deleteCard(UUID): void
+  }
+}
+
+package "Repository Layer" {
+  interface DeckRepository <<Repository>> {
+    + findAll(): List<Deck>
+    + findById(UUID): Optional<Deck>
+    + findByOwnerId(UUID): List<Deck>
+    + save(Deck): Deck
+    + deleteById(UUID): void
+  }
+
+  interface CardRepository <<Repository>> {
+    + findByDeckId(UUID): List<Card>
+    + save(Card): Card
+    + deleteById(UUID): void
+  }
+}
+
+package "Model Layer" {
+  class Deck <<Entity>> {
+    - UUID id
+    - String name
+    - String description
+    - UUID ownerId
+    + getId(): UUID
+    + getName(): String
+    + getDescription(): String
+    + getOwnerId(): UUID
+  }
+
+  class Card <<Entity>> {
+    - UUID id
+    - String front
+    - String back
+    - UUID deckId
+    + getId(): UUID
+    + getFront(): String
+    + getBack(): String
+    + getDeckId(): UUID
+  }
+}
+
+package "DTO Layer" {
+  class DeckDTO <<DTO>> {
+    - UUID id
+    - String name
+    - String description
+    - UUID ownerId
+  }
+
+  class CardDTO <<DTO>> {
+    - UUID id
+    - String front
+    - String back
+    - UUID deckId
+  }
+}
+
+database "PostgreSQL" as DB {
+  entity decks {
+    *uuid: uuid (PK)
+    --
+    name: text
+    description: text
+    owner_id: uuid
+  }
+
+  entity cards {
+    *uuid: uuid (PK)
+    --
+    front: text
+    back: text
+    deck_id: uuid (FK)
+  }
+}
+
+' Connections
+DeckController --> DeckService
+DeckController --> CardService
+DeckController --> DeckMapper
+DeckController --> CardMapper
+DeckController .> DeckDTO : returns
+DeckController .> CardDTO : returns
+
+DeckMapper .> DeckDTO : creates
+DeckMapper .> Deck : converts to
+CardMapper .> CardDTO : creates
+CardMapper .> Card : converts to
+
+DeckServiceImpl ..|> DeckService
+CardServiceImpl ..|> CardService
+
+DeckServiceImpl --> DeckRepository
+CardServiceImpl --> CardRepository
+
+DeckRepository ..> Deck
+CardRepository ..> Card
+
+DeckRepository -> DB.decks : maps to
+CardRepository -> DB.cards : maps to
+
+DB.decks ||--o{ DB.cards
+
+note right of DeckController
+  **Deck API:**
+  GET    /api/decks
+  GET    /api/decks?ownerId={id}
+  GET    /api/decks/{id}
+  POST   /api/decks
+  DELETE /api/decks/{id}
+
+  **Card API:**
+  GET    /api/decks/{deckId}/cards
+  POST   /api/cards
+  DELETE /api/cards/{cardId}
+end note
+
+@enduml
