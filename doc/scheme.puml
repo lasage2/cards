@@ -8,8 +8,6 @@ package "Controller Layer" {
   class DeckController <<RestController>> {
     - DeckService deckService
     - CardService cardService
-    - DeckMapper deckMapper
-    - CardMapper cardMapper
     + getAllDecks(): List<DeckDTO>
     + getDeckById(UUID): DeckDTO
     + getDecksByOwnerId(UUID): List<DeckDTO>
@@ -35,32 +33,32 @@ package "Mapper Layer" {
 
 package "Service Layer" {
   interface DeckService <<Interface>> {
-    + getAllDecks(): List<Deck>
+    + getAllDecks(): List<DeckDTO>
     + getDeckById(UUID): Deck
-    + getDecksByOwnerId(UUID): List<Deck>
-    + createDeck(Deck): Deck
+    + getDecksByOwnerId(UUID): List<DeckDTO>
+    + createDeck(DeckDTO): DeckDTO
     + deleteDeck(UUID): void
   }
 
   class DeckServiceImpl <<Service>> {
     - DeckRepository deckRepository
-    + getAllDecks(): List<Deck>
-    + getDeckById(UUID): Deck
-    + getDecksByOwnerId(UUID): List<Deck>
-    + createDeck(Deck): Deck
+    + getAllDecks(): List<DeckDTO>
+    + getDeckById(UUID): DeckDTO
+    + getDecksByOwnerId(UUID): List<DeckDTO>
+    + createDeck(DeckDTO): DeckDTO
     + deleteDeck(UUID): void
   }
 
   interface CardService <<Interface>> {
-    + getCardsByDeckId(UUID): List<Card>
-    + createCard(Card): Card
+    + getCardsByDeckId(UUID): List<CardDTO>
+    + createCard(CardDTO): CardDTO
     + deleteCard(UUID): void
   }
 
   class CardServiceImpl <<Service>> {
     - CardRepository cardRepository
-    + getCardsByDeckId(UUID): List<Card>
-    + createCard(Card): Card
+    + getCardsByDeckId(UUID): List<CardDTO>
+    + createCard(CardDTO): CardDTO
     + deleteCard(UUID): void
   }
 }
@@ -176,8 +174,8 @@ note right of DeckController
 
   **Card API:**
   GET    /api/decks/{deckId}/cards
-  POST   /api/cards
-  DELETE /api/cards/{cardId}
+  POST   /api/decks/cards
+  DELETE /api/decks/cards/{cardId}
 end note
 
 @enduml
